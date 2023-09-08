@@ -27,7 +27,9 @@ public class SecurityConfig {
                 .anyRequest().permitAll() // 이외의 요청은 모든 사람에게 권한 허용
                 .and()
                 .formLogin()
-                .loginPage("/loginForm");
+                .loginPage("/loginForm")
+                .loginProcessingUrl("/login") // login이라는 주소가 호출이 되면 시큐리티가 낚아채서 대신 로그인을 진행해줌
+                .defaultSuccessUrl("/");
 
         return http.build();
     }
