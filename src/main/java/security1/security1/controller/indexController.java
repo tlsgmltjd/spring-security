@@ -4,12 +4,17 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.annotation.Secured;
 import org.springframework.security.access.prepost.PostAuthorize;
 import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.ResponseBody;
+import security1.security1.config.auth.PrincipalDetails;
 import security1.security1.model.User;
 import security1.security1.repository.UserRepository;
 
@@ -22,6 +27,28 @@ public class indexController {
     @Autowired
     private BCryptPasswordEncoder bCryptPasswordEncoder;
 
+    @GetMapping("/test/login")
+    public @ResponseBody String testLogin(Authentication authentication,
+                                          @AuthenticationPrincipal PrincipalDetails userDetails) { // DI
+        System.out.println("/test/login =======================");
+        PrincipalDetails principalDetails = (PrincipalDetails) authentication.getPrincipal();
+        System.out.println("authentication : " + principalDetails.getUser()); // Authentication을 DI해서 UserObject를 찾을 수 있고
+        System.out.println("userDetails : " + userDetails.getUser()); // @AuthenticationPrincipal 어노테이션을 통해 UserObject를 찾을 수 있다.
+
+        return "세션 정보 확인하기";
+    }
+
+    @GetMapping("/test/oauth/login")
+    public @ResponseBody String testOAuthLogin(Authentication authentication,
+                                               @AuthenticationPrincipal OAuth2User oauth) { // DI
+        System.out.println("/test/oauth.login =======================");
+        OAuth2User oAuth2User = (OAuth2User) authentication.getPrincipal();
+        System.out.println("oAuth2User : " + oAuth2User.getAttributes());
+        System.out.println("oauth2User : " + oauth.getAttributes());
+
+        return "OAuth 세션 정보 확인하기";
+    }
+
     @GetMapping({"", "/"})
     public String index() {
         // 머스테치 기본폴더 src/main/resources/
@@ -29,8 +56,13 @@ public class indexController {
         return "index";
     }
 
+    // OAuth 로그인을 해도 PrincipalDetails
+    // 일반 로그인을 해도 PrincipalDetails
+
+    // public class PrincipalDetails implements UserDetails, OAuth2User <- 그렇다
     @GetMapping("/user")
-    public @ResponseBody String user() {
+    public @ResponseBody String user(@AuthenticationPrincipal PrincipalDetails principalDetails) {
+        System.out.println("PrincipalDetails : " + principalDetails.getUser());
         return "user";
     }
 
